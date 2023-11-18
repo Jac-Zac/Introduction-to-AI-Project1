@@ -137,7 +137,6 @@ def breadthFirstSearch(problem: SearchProblem):
             for node, action, _ in problem.getSuccessors(current_node):
                 next_action = actions + [action]
                 frontier.push((node, next_action))
-    util.raiseNotDefined()
 
 
 def uniformCostSearch(problem: SearchProblem):
@@ -183,8 +182,10 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     "*** YOUR CODE HERE ***"
     starting_node = problem.getStartState()
     visited = set()
-    frontier = util.PriorityQueueWithFunction(lambda x: x[-1])
-    # frontier = util.PriorityQueue()
+
+    frontier = util.PriorityQueueWithFunction(
+        lambda x: x[-1] + heuristic(x[0], problem)
+    )
 
     # If start state is a goal return
     if problem.isGoalState(starting_node):
@@ -205,8 +206,6 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
                 next_action = actions + [action]
                 cost = old_cost + cost
                 frontier.push((node, next_action, cost))
-
-    util.raiseNotDefined()
 
 
 # Abbreviations
