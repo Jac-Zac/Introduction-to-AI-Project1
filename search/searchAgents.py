@@ -338,7 +338,8 @@ class CornersProblem(search.SearchProblem):
                 print("Warning: no food in corner " + str(corner))
         self._expanded = 0  # DO NOT CHANGE; Number of search nodes expanded
 
-        self.initialState = [0, 0, 0, 0]
+        # For display purposes
+        self._visited, self._visitedlist, self._expanded = {}, [], 0  # DO NOT CHANGE
 
     def getStartState(self):
         """
@@ -346,20 +347,28 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return (self.startingPosition, self.initialState)
+        return (self.startingPosition, self.corners)
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        if state in self.corners:
-            self.corners.remove(state)
 
-        if not self.corners:
-            return True
+        # For display purposes only
+        # using the walrus operator to be like the cool kids :)
+        if isGoal := (len(state[1]) == 0):
+            self._visitedlist.append(state[0])
+            import __main__
 
-        return False
+            if "_display" in dir(__main__):
+                if "drawExpandedCells" in dir(__main__._display):  # @UndefinedVariable
+                    __main__._display.drawExpandedCells(
+                        self._visitedlist
+                    )  # @UndefinedVariable
+
+        # If there are no more remaining corner return True
+        return isGoal
 
     def getSuccessors(self, state: Any):
         """
@@ -371,7 +380,6 @@ class CornersProblem(search.SearchProblem):
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
-
         successors = []
         for action in [
             Directions.NORTH,
@@ -387,15 +395,26 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-            x, y = state[0]  # Get (x,y)
+            x, y = state[0]  # get the position
             dx, dy = Actions.directionToVector(action)
+
             nextx, nexty = int(x + dx), int(y + dy)
-            if not self.walls[nextx][nexty]:
-                nextState = (nextx, nexty)
-                cost = 1
-                successors.append((nextState, action, cost))
+            hitsWall = self.walls[nextx][nexty]
+
+            if not hitsWall:
+                nextPosition = (nextx, nexty)
+                newRemainingCorners = tuple(
+                    corner for corner in state[1] if corner != nextPosition
+                )
+                successors.append(((nextPosition, newRemainingCorners), action, 1))
 
         self._expanded += 1  # DO NOT CHANGE
+
+        # adding visualization
+        if state[0] not in self._visited:
+            self._visited[state[0]] = True
+            self._visitedlist.append(state[0])
+
         return successors
 
     def getCostOfActions(self, actions):
