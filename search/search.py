@@ -86,7 +86,6 @@ def depthFirstSearch(problem: SearchProblem):
     understand the search problem that is being passed in:
 
     "*** YOUR CODE HERE ***"
-    python pacman.py -l mediumMaze -p Search Agent
     """
 
     starting_node = problem.getStartState()
@@ -97,7 +96,7 @@ def depthFirstSearch(problem: SearchProblem):
     if problem.isGoalState(starting_node):
         return []
 
-    # Push everything bu the cost to the stack as a tuple
+    # Push everything to the stack and empty list for the move
     frontier.push((starting_node, []))
 
     while not (frontier.isEmpty()):
@@ -109,23 +108,68 @@ def depthFirstSearch(problem: SearchProblem):
                 return actions
 
             for node, action, _ in problem.getSuccessors(current_node):
-                if node is not visited:
-                    next_action = actions + [action]
-                    frontier.push((node, next_action))
+                next_action = actions + [action]
+                frontier.push((node, next_action))
 
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    starting_node = problem.getStartState()
+    visited = set()
+    frontier = util.Queue()
+
+    # If start state is a goal return
+    if problem.isGoalState(starting_node):
+        return []
+
+    # Push everything to the stack and empty list for the move
+    frontier.push((starting_node, []))
+
+    while not (frontier.isEmpty()):
+        # Get the action and current node from the stack
+        current_node, actions = frontier.pop()
+        if current_node not in visited:
+            visited.add(current_node)
+            if problem.isGoalState(current_node):
+                return actions
+
+            for node, action, _ in problem.getSuccessors(current_node):
+                next_action = actions + [action]
+                frontier.push((node, next_action))
     util.raiseNotDefined()
 
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    starting_node = problem.getStartState()
+    visited = set()
+    frontier = util.PriorityQueueWithFunction(lambda x: x[-1])
+    # frontier = util.PriorityQueue()
+
+    # If start state is a goal return
+    if problem.isGoalState(starting_node):
+        return []
+
+    # Push everything to the stack by passing empty actions and zero cost list
+    frontier.push((starting_node, [], 0))
+
+    while not (frontier.isEmpty()):
+        # Get the actions, current node and the relative costs for the actions
+        current_node, actions, old_cost = frontier.pop()
+        if current_node not in visited:
+            visited.add(current_node)
+            if problem.isGoalState(current_node):
+                return actions
+
+            for node, action, cost in problem.getSuccessors(current_node):
+                next_action = actions + [action]
+                cost = old_cost + cost
+                frontier.push((node, next_action, cost))
 
 
+# Consistent and admissible but useless
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
@@ -137,6 +181,31 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    starting_node = problem.getStartState()
+    visited = set()
+    frontier = util.PriorityQueueWithFunction(lambda x: x[-1])
+    # frontier = util.PriorityQueue()
+
+    # If start state is a goal return
+    if problem.isGoalState(starting_node):
+        return []
+
+    # Push everything to the stack by passing empty actions and zero cost list
+    frontier.push((starting_node, [], 0))
+
+    while not (frontier.isEmpty()):
+        # Get the actions, current node and the relative costs for the actions
+        current_node, actions, old_cost = frontier.pop()
+        if current_node not in visited:
+            visited.add(current_node)
+            if problem.isGoalState(current_node):
+                return actions
+
+            for node, action, cost in problem.getSuccessors(current_node):
+                next_action = actions + [action]
+                cost = old_cost + cost
+                frontier.push((node, next_action, cost))
+
     util.raiseNotDefined()
 
 
