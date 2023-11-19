@@ -347,7 +347,9 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return (self.startingPosition, self.corners)
+        # instead of passing the self.corners we keep a bit vector to reduce used space
+        corners = (0, 0, 0, 0)
+        return (self.startingPosition, corners)
 
     def isGoalState(self, state: Any):
         """
@@ -357,7 +359,8 @@ class CornersProblem(search.SearchProblem):
 
         # For display purposes only
         # using the walrus operator to be like the cool kids :)
-        if isGoal := (len(state[1]) == 0):
+        # If all the corners have been visited thus summing over the corners
+        if isGoal := (sum(state[1]) == 4):
             self._visitedlist.append(state[0])
             import __main__
 
@@ -387,13 +390,6 @@ class CornersProblem(search.SearchProblem):
             Directions.EAST,
             Directions.WEST,
         ]:
-            # Add a successor state to the successor list if the action is legal
-            # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
-
             "*** YOUR CODE HERE ***"
             x, y = state[0]  # get the position
             dx, dy = Actions.directionToVector(action)
@@ -403,9 +399,14 @@ class CornersProblem(search.SearchProblem):
 
             if not hitsWall:
                 nextPosition = (nextx, nexty)
+                newRemainingCorners = list(state[1])  # Copy the current bit vector
                 newRemainingCorners = tuple(
-                    corner for corner in state[1] if corner != nextPosition
+                    1 if corner == nextPosition else state[1][i]
+                    for i, corner in enumerate(self.corners)
                 )
+                # newRemainingCorners = tuple(
+                # 1 if corner == nextPosition else corner for corner in state[1]
+                # )
                 successors.append(((nextPosition, newRemainingCorners), action, 1))
 
         self._expanded += 1  # DO NOT CHANGE
@@ -433,6 +434,7 @@ class CornersProblem(search.SearchProblem):
         return len(actions)
 
 
+# Simple stupid huristic
 def cornersHeuristic(state: Any, problem: CornersProblem):
     """
     A heuristic for the CornersProblem that you defined.
@@ -450,19 +452,54 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     # walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
+    # Get the position and a bitmap with 1 for visited corners and 0 otherwise
+    position, bitmap = state
 
-    # If I have time find a more useful heuristic
-
-    current_position, remaning_corners = state
-    # define the manatthan_distance
-    manhattan_distance = lambda a, b: abs(a[0] - b[0]) + abs(a[1] - b[1])
-
-    distances = [
-        manhattan_distance(current_position, corner) for corner in remaning_corners
+    # Create a list of unvisited corners
+    unvisited_corners = [
+        corner for i, corner in enumerate(problem.corners) if not bitmap[i]
     ]
 
-    # Return maximum distance or 0 if no remaining corners
-    return max(distances, default=0)
+    manhattan_distance = lambda a, b: abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+    # Magari la distanza da ogni corner e poi partiamo da quel corner per contare la distanza
+    return max(
+        [manhattan_distance(position, corner) for corner in unvisited_corners],
+        default=0,
+    )
+
+
+# Not consistent but crazy good
+# def cornersHeuristic(state: Any, problem: CornersProblem):
+#     position, bitmap = state
+#
+#     # Create a list of unvisited corners
+#     unvisited_corners = [
+#         corner for i, corner in enumerate(problem.corners) if not bitmap[i]
+#     ]
+#
+#     manhattan_distance = lambda a, b: abs(a[0] - b[0]) + abs(a[1] - b[1])
+#
+#     # Initialize heuristic value
+#     heuristic_value = 0
+#
+#     # While there are unvisited corners
+#     while unvisited_corners:
+#         # Find the nearest unvisited corner
+#         nearest_corner = min(
+#             unvisited_corners, key=lambda corner: manhattan_distance(position, corner)
+#         )
+#
+#         # Add the distance to the nearest corner to the heuristic value
+#         heuristic_value += manhattan_distance(position, nearest_corner)
+#
+#         # Update the position to the nearest corner
+#         position = nearest_corner
+#
+#         # Remove the nearest corner from the list of unvisited corners
+#         unvisited_corners.remove(nearest_corner)
+#
+#     return heuristic_value
 
 
 class AStarCornersAgent(SearchAgent):

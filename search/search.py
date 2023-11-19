@@ -145,7 +145,6 @@ def uniformCostSearch(problem: SearchProblem):
     starting_node = problem.getStartState()
     visited = set()
     frontier = util.PriorityQueueWithFunction(lambda x: x[-1])
-    # frontier = util.PriorityQueue()
 
     # If start state is a goal return
     if problem.isGoalState(starting_node):
@@ -183,6 +182,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     starting_node = problem.getStartState()
     visited = set()
 
+    # lambda is made to take account of the cost + the heuristic
     frontier = util.PriorityQueueWithFunction(
         lambda x: x[-1] + heuristic(x[0], problem)
     )
