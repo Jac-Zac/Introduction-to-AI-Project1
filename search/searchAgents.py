@@ -564,7 +564,7 @@ class FoodSearchProblem:
                 nextFood[nextx][nexty] = False
                 successors.append((((nextx, nexty), nextFood), direction, 1))
 
-            # adding visualization
+        # adding visualization
         if state[0] not in self._visited:
             self._visited[state[0]] = True
             self._visitedlist.append(state[0])
@@ -670,14 +670,7 @@ class ClosestDotSearchAgent(SearchAgent):
             key=lambda food: mazeDistance(startPosition, food, gameState),
         )
 
-        prob = PositionSearchProblem(
-            gameState,
-            start=startPosition,
-            goal=closest_food,
-            warn=False,
-            visualize=False,
-        )
-        return search.bfs(prob)
+        return mazePath(startPosition, closest_food, gameState)
 
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -738,3 +731,17 @@ def mazeDistance(
         gameState, start=point1, goal=point2, warn=False, visualize=False
     )
     return len(search.bfs(prob))
+
+
+def mazePath(
+    point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState
+) -> List[Directions]:
+    x1, y1 = point1
+    x2, y2 = point2
+    walls = gameState.getWalls()
+    assert not walls[x1][y1], "point1 is a wall: " + str(point1)
+    assert not walls[x2][y2], "point2 is a wall: " + str(point2)
+    prob = PositionSearchProblem(
+        gameState, start=point1, goal=point2, warn=False, visualize=False
+    )
+    return search.bfs(prob)
