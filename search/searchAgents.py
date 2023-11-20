@@ -435,39 +435,24 @@ class CornersProblem(search.SearchProblem):
 
 
 # Simple stupid huristic
-def cornersHeuristic(state: Any, problem: CornersProblem):
-    """
-    A heuristic for the CornersProblem that you defined.
-
-      state:   The current search state
-               (a data structure you chose in your search problem)
-
-      problem: The CornersProblem instance for this layout.
-
-    This function should always return a number that is a lower bound on the
-    shortest path from the state to a goal of the problem; i.e.  it should be
-    admissible (as well as consistent).
-    """
-    # corners = problem.corners  # These are the corner coordinates
-    # walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
-
-    "*** YOUR CODE HERE ***"
-    # Get the position and a bitmap with 1 for visited corners and 0 otherwise
-    position, bitmap = state
-
-    # Create a list of unvisited corners
-    unvisited_corners = [
-        corner for i, corner in enumerate(problem.corners) if not bitmap[i]
-    ]
-
-    return max(
-        [util.manhattanDistance(position, corner) for corner in unvisited_corners],
-        default=0,
-    )
-
-
-# Great Heuristic I'm not sure about consistency though
 # def cornersHeuristic(state: Any, problem: CornersProblem):
+#     """
+#     A heuristic for the CornersProblem that you defined.
+#
+#       state:   The current search state
+#                (a data structure you chose in your search problem)
+#
+#       problem: The CornersProblem instance for this layout.
+#
+#     This function should always return a number that is a lower bound on the
+#     shortest path from the state to a goal of the problem; i.e.  it should be
+#     admissible (as well as consistent).
+#     """
+#     # corners = problem.corners  # These are the corner coordinates
+#     # walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
+#
+#     "*** YOUR CODE HERE ***"
+#     # Get the position and a bitmap with 1 for visited corners and 0 otherwise
 #     position, bitmap = state
 #
 #     # Create a list of unvisited corners
@@ -475,27 +460,42 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
 #         corner for i, corner in enumerate(problem.corners) if not bitmap[i]
 #     ]
 #
-#     # Initialize heuristic value
-#     heuristic_value = 0
-#
-#     # While there are unvisited corners
-#     while unvisited_corners:
-#         # Find the nearest unvisited corner
-#         nearest_corner = min(
-#             unvisited_corners,
-#             key=lambda corner: util.manhattanDistance(position, corner),
-#         )
-#
-#         # Add the distance to the nearest corner to the heuristic value
-#         heuristic_value += util.manhattanDistance(position, nearest_corner)
-#
-#         # Update the position to the nearest corner
-#         position = nearest_corner
-#
-#         # Remove the nearest corner from the list of unvisited corners
-#         unvisited_corners.remove(nearest_corner)
-#
-#     return heuristic_value
+#     return max(
+#         [util.manhattanDistance(position, corner) for corner in unvisited_corners],
+#         default=0,
+#     )
+
+
+# Great Heuristic I'm not sure about consistency though
+def cornersHeuristic(state: Any, problem: CornersProblem):
+    position, bitmap = state
+
+    # Create a list of unvisited corners
+    unvisited_corners = [
+        corner for i, corner in enumerate(problem.corners) if not bitmap[i]
+    ]
+
+    # Initialize heuristic value
+    heuristic_value = 0
+
+    # While there are unvisited corners
+    while unvisited_corners:
+        # Find the nearest unvisited corner
+        nearest_corner = min(
+            unvisited_corners,
+            key=lambda corner: util.manhattanDistance(position, corner),
+        )
+
+        # Add the distance to the nearest corner to the heuristic value
+        heuristic_value += util.manhattanDistance(position, nearest_corner)
+
+        # Update the position to the nearest corner
+        position = nearest_corner
+
+        # Remove the nearest corner from the list of unvisited corners
+        unvisited_corners.remove(nearest_corner)
+
+    return heuristic_value
 
 
 class AStarCornersAgent(SearchAgent):
@@ -624,9 +624,13 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+    foodList = foodGrid.asList()
 
     return max(
-        [util.manhattanDistance(position, food) for food in foodGrid.asList()],
+        [
+            mazeDistance(position, corner, problem.startingGameState)
+            for corner in foodList
+        ],
         default=0,
     )
 
@@ -733,6 +737,7 @@ def mazeDistance(
     return len(search.bfs(prob))
 
 
+# Added utility function
 def mazePath(
     point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState
 ) -> List[Directions]:
