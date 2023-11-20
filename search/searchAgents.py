@@ -404,9 +404,6 @@ class CornersProblem(search.SearchProblem):
                     1 if corner == nextPosition else state[1][i]
                     for i, corner in enumerate(self.corners)
                 )
-                # newRemainingCorners = tuple(
-                # 1 if corner == nextPosition else corner for corner in state[1]
-                # )
                 successors.append(((nextPosition, newRemainingCorners), action, 1))
 
         self._expanded += 1  # DO NOT CHANGE
