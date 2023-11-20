@@ -624,12 +624,10 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    foodList = foodGrid.asList()
-
     return max(
         [
             mazeDistance(position, corner, problem.startingGameState)
-            for corner in foodList
+            for corner in foodGrid.asList()
         ],
         default=0,
     )
